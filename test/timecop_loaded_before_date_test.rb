@@ -5,8 +5,8 @@
 # and re-execute ourself without that.
 if defined?(Date)
   puts "Date already exists...reloading myself without bundler/setup"
-  Kernel.exec({'RUBYOPT'=>ENV['RUBYOPT'].gsub(%r{-rbundler/setup},'')},
-    (ENV['RUBY'] || 'ruby'), '-I../lib:.', __FILE__)
+  ENV['RUBYOPT'] = ENV['RUBYOPT'].gsub(%r{-rbundler/setup},'')
+  Kernel.exec((ENV['RUBY'] || 'ruby'), '-I../lib:.', __FILE__)
 end
 
 # Require timecop first, before anything else that would load 'date'
