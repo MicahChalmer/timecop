@@ -2,7 +2,14 @@ require 'date'
 require File.join(File.dirname(__FILE__), "test_helper")
 require File.join(File.dirname(__FILE__), '..', 'lib', 'timecop')
 
+require 'active_support/all'
+
 class TestTimeStackItem < Test::Unit::TestCase
+  def setup
+    Timecop.active_support = false
+    Time.zone = nil
+  end
+
   def teardown
     Timecop.active_support = nil
     Timecop.return
@@ -157,7 +164,8 @@ class TestTimeStackItem < Test::Unit::TestCase
   end
 
   def test_timezones
-    require 'active_support/all'
+    Timecop.active_support = true
+
     Time.zone = "Europe/Zurich"
     time = Time.zone.parse("2012-12-27T12:12:12+08:00")
     Timecop.freeze(time) do |frozen_time|
@@ -186,6 +194,7 @@ class TestTimeStackItem < Test::Unit::TestCase
   end
 
   def test_parse_string_date_with_active_support
+    Timecop.active_support = true
     date = '2012-01-02'
     Time.expects(:parse).with(date).returns(Time.local(2012, 01, 02))
     Timecop.freeze(date)
@@ -204,6 +213,7 @@ class TestTimeStackItem < Test::Unit::TestCase
   end
 
   def test_uses_active_supports_in_time_zone
+    Timecop.active_support = true
     time = Time.now
     Time.any_instance.expects(:in_time_zone).returns(time)
     Timecop::TimeStackItem.new(:freeze, time)
@@ -222,8 +232,7 @@ class TestTimeStackItem < Test::Unit::TestCase
   end
 
   def test_time_zone_returns_nil
-    c = class << Time; self end
-    c.send(:define_method, :zone) { nil }
+    Time.zone = nil
     assert_nothing_raised do
       Timecop.freeze
     end
@@ -237,7 +246,7 @@ class TestTimeStackItem < Test::Unit::TestCase
   end
 
   def test_time_with_different_timezone
-    require 'active_support/all'
+    Timecop.active_support = true
 
     Time.zone = "Tokyo"
     t = Time.now
